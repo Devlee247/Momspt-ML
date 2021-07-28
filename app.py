@@ -1,14 +1,20 @@
 import os
 from flask import Flask, request, redirect, url_for
 from werkzeug.utils import secure_filename
+import subprocess
 
-import argparse
+import torch
 
 from modules.analyze_video import convert_mp4_to_pkl
-from modules import fbx_output
+from modules.fbx_output import convert_pkl_to_fbx
 
 # 영상 분석시 영상 선택 및 경로, 옵션 지정
-argv = ['--vid_file', 'sample_video.mp4', '--output_folder', 'output/', '--no_render']
+argv_mp4 = ['--vid_file', 'sample_video.mp4', '--output_folder', 'output/', '--no_render']
+argv_pkl = ['python', 'modules/fbx_output.py','--input','output/sample_video/vibe_output.pkl', '--output',
+            'output/sample_video/fbx_output.glb', '--fps_source', '30',
+            '--fps_target', '30', '--gender', 'female', '--person_id', '1']
+
+person_id = 1
 
 UPLOAD_FOLDER = os.getcwd() + '/' + 'videos' # 영상 업로드 위치
 ALLOWED_EXTENSIONS = {'mp4'} # 허용되는 영상 확장자
@@ -49,13 +55,23 @@ def upload_file():
         # 파일 존재유무 확인 및 허가된 확장자명인지 확인
         if file and allowd_file(file.filename):
             filename = secure_filename(file.filename)
-            filepath = 'videos' + '/' + filename
+            filepath_mp4 = 'videos' + '/' + filename
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            
             # .mp4 to .pkl 변환 
-            argv[1] = filepath
-            convert_mp4_to_pkl(argv)
-            print(request.url)
+            argv_mp4[1] = filepath_mp4
+            convert_mp4_to_pkl(argv_mp4)
+
+            # .pkl to .fbx 변환
+            file_path_pkl = 'output' + '/' + filename.rsplit('.',1)[0] + '/' + 'vibe_output.pkl'
+            file_path_fbx = 'output' + '/' + filename.rsplit('.',1)[0] + '/' + 'fbx_output.glb'
+            argv_pkl[3] = file_path_pkl
+            argv_pkl[5] = file_path_fbx
+            global person_id
+            argv_pkl[13] = str(person_id)
+            person_id += 1
+
+            p = subprocess.run(args=argv_pkl)
+            torch.cuda.empty_cache()
             return redirect(request.url)
     return '''
     <!doctype html>
