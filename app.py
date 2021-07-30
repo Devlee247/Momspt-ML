@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
 import subprocess
 
@@ -46,7 +46,6 @@ def upload_file():
             print('No file part')
             return redirect(request.url)
         file = request.files['file']
-        
         # 파일을 선택하였는지 확인
         if file.filename == '':
             print('No selected file or uncorrect file')
@@ -64,6 +63,7 @@ def upload_file():
             # .pkl to .fbx 변환
             file_path_pkl = 'output' + '/' + filename.rsplit('.',1)[0] + '/' + 'vibe_output.pkl'
             file_path_fbx = 'output' + '/' + filename.rsplit('.',1)[0] + '/' + 'fbx_output.glb'
+
             argv_pkl[3] = file_path_pkl
             argv_pkl[5] = file_path_fbx
             global person_id
@@ -72,7 +72,7 @@ def upload_file():
 
             p = subprocess.run(args=argv_pkl)
             torch.cuda.empty_cache()
-            return redirect(request.url)
+            return send_file(file_path_fbx , mimetype = 'glb')
     return '''
     <!doctype html>
     <title>Upload new File</title>
@@ -82,3 +82,6 @@ def upload_file():
       <input type=submit value=Upload>
     </form>
     '''
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=4500)
