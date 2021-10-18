@@ -8,6 +8,8 @@ import torch
 from modules.analyze_video import convert_mp4_to_pkl
 from modules.fbx_output import convert_pkl_to_fbx
 from modules.pkl_to_csv import pkl_to_csv
+from modules.get_frame import get_frame
+
 
 def makedirs(path): 
    try: 
@@ -79,6 +81,9 @@ def upload_file():
 
             # .pkl to .csv 변환
             pkl_to_csv(DATA_PATH=file_path_pkl, CSV_OUTPUT_PATH=csv_path)
+
+            # 4개의 프레임 추출
+            frames = get_frame(csv_path=csv_path, pretrained_path='data/gifv_data/checkpoint.pth.tar')
 
             # .pkl to 3d model file 변환
             argv_pkl[3] = file_path_pkl

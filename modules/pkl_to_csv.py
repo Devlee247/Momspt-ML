@@ -44,7 +44,7 @@ def list_to_csv(csv_path, data):
     csv_file = open(csv_path, 'w')
     csv_out_writer = csv.writer(csv_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
     for data_row in data:
-        csv_out_writer.writerow(data_row)
+        csv_out_writer.writerow([0,0] + data_row)
 
 def pkl_to_csv(DATA_PATH, CSV_OUTPUT_PATH):
     data = open_pkl(DATA_PATH)
