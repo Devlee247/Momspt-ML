@@ -8,6 +8,13 @@ import torch
 from modules.analyze_video import convert_mp4_to_pkl
 from modules.fbx_output import convert_pkl_to_fbx
 
+def makedirs(path): 
+   try: 
+        os.makedirs(path) 
+   except OSError: 
+       if not os.path.isdir(path): 
+           raise
+
 # 영상 분석시 영상 선택 및 경로, 옵션 지정
 argv_mp4 = ['--vid_file', 'sample_video.mp4', '--output_folder', 'output/', '--no_render']
 argv_pkl = ['python', 'modules/fbx_output.py','--input','output/sample_video/vibe_output.pkl', '--output',
@@ -55,6 +62,10 @@ def upload_file():
         if file and allowd_file(file.filename):
             filename = secure_filename(file.filename)
             filepath_mp4 = 'videos' + '/' + filename
+
+            # videos 폴더 유무 확인 후, 없으면 폴더 생성
+            makedirs('videos')
+
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # .mp4 to .pkl 변환 
             argv_mp4[1] = filepath_mp4
