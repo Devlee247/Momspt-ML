@@ -7,6 +7,7 @@ import torch
 
 from modules.analyze_video import convert_mp4_to_pkl
 from modules.fbx_output import convert_pkl_to_fbx
+from modules.pkl_to_csv import pkl_to_csv
 
 def makedirs(path): 
    try: 
@@ -71,10 +72,15 @@ def upload_file():
             argv_mp4[1] = filepath_mp4
             convert_mp4_to_pkl(argv_mp4)
 
-            # .pkl to .fbx 변환
+            # 각 path 지정
             file_path_pkl = 'output' + '/' + filename.rsplit('.',1)[0] + '/' + 'vibe_output.pkl'
+            csv_path = 'output' + '/' + filename.rsplit('.',1)[0] + '/' + 'csv_output.csv'
             file_path_fbx = 'output' + '/' + filename.rsplit('.',1)[0] + '/' + 'fbx_output.glb'
 
+            # .pkl to .csv 변환
+            pkl_to_csv(DATA_PATH=file_path_pkl, CSV_OUTPUT_PATH=csv_path)
+
+            # .pkl to 3d model file 변환
             argv_pkl[3] = file_path_pkl
             argv_pkl[5] = file_path_fbx
             global person_id
